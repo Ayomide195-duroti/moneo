@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Moneo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#06255E;--navy-d:#041a45;--lime:#B2F55A;--ink:#0f172a;--muted:#475569;--line:#e9edf3;--field:#f8f9fb;--err:#dc2626}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;min-height:100dvh;font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);
+  background-color:#f3f6ff;
+  background-image:linear-gradient(rgba(6,37,94,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(6,37,94,.055) 1px,transparent 1px);
+  background-size:46px 46px;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;background:radial-gradient(ellipse at 50% 35%,rgba(255,255,255,.85),rgba(255,255,255,0) 70%)}
+.page{position:relative;min-height:100dvh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:calc(28px + env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom))}
+.brand{margin-bottom:22px}
+.logo{display:block;width:190px;height:auto;border-radius:18px}
+.card{width:100%;max-width:440px;background:#fff;border:1px solid #eef1f7;border-radius:32px;padding:20px;box-shadow:0 24px 60px -28px rgba(6,37,94,.28)}
+@media(min-width:520px){.card{padding:28px}}
+.tabs{display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:5px;background:var(--field);border:1px solid var(--line);border-radius:999px}
+.tabs button{height:48px;border:0;border-radius:999px;background:transparent;font:inherit;font-size:15px;font-weight:500;color:var(--muted);cursor:pointer;transition:background .2s,color .2s}
+.tabs button:hover{color:var(--navy)}
+.tabs button[aria-selected=true]{background:var(--navy);color:#fff;font-weight:600}
+.tabs button:focus-visible{outline:3px solid rgba(6,37,94,.25);outline-offset:2px}
+.view[hidden]{display:none}
+h1{margin:26px 0 8px;text-align:center;font-size:27px;line-height:1.2;font-weight:600;letter-spacing:-.02em}
+.sub{margin:0 0 24px;text-align:center;font-size:15px;line-height:1.55;color:var(--muted)}
+.back{display:inline-flex;align-items:center;gap:6px;margin-bottom:4px;border:0;background:none;padding:6px 2px;font:inherit;font-size:14px;font-weight:500;color:var(--navy);cursor:pointer}
+.back:hover{text-decoration:underline}
+.gbtn{width:100%;height:56px;display:flex;align-items:center;justify-content:center;gap:12px;background:#fff;border:1px solid var(--line);border-radius:999px;font:inherit;font-size:15px;font-weight:500;color:var(--ink);cursor:pointer;transition:background .2s,border-color .2s}
+.gbtn:hover{background:var(--field);border-color:#d8dee8}
+.gbtn svg{width:22px;height:22px}
+.gbtn:focus-visible,.btn:focus-visible{outline:3px solid rgba(6,37,94,.3);outline-offset:2px}
+.divider{display:flex;align-items:center;gap:14px;margin:22px 0;font-size:14px;color:var(--muted)}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:var(--line)}
+form{display:grid;gap:18px}
+.field label{display:flex;justify-content:space-between;align-items:baseline;margin:0 0 8px 2px;font-size:15px;font-weight:500}
+.field label a{font-size:14px;font-weight:500;color:var(--navy);text-decoration:none}
+.field label a:hover{text-decoration:underline}
+.inp{position:relative}
+.inp .ic{position:absolute;left:20px;top:50%;width:21px;height:21px;margin-top:-10.5px;color:#475569;pointer-events:none}
+.inp input{width:100%;height:56px;padding:0 54px 0 52px;background:var(--field);border:1px solid var(--line);border-radius:999px;font:inherit;font-size:15px;color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s,background .2s}
+.inp input::placeholder{color:#8a94a6}
+.inp input:hover{border-color:#d8dee8}
+.inp input:focus{background:#fff;border-color:var(--navy);box-shadow:0 0 0 4px rgba(6,37,94,.1)}
+.inp input[aria-invalid=true]{border-color:var(--err)}
+.inp input:disabled{opacity:.7;cursor:not-allowed}
+.eye{position:absolute;right:6px;top:50%;width:44px;height:44px;margin-top:-22px;display:flex;align-items:center;justify-content:center;border:0;border-radius:50%;background:none;color:#475569;cursor:pointer}
+.eye:hover,.eye:focus-visible{color:var(--navy)}
+.eye:focus-visible{outline:3px solid rgba(6,37,94,.25)}
+.eye svg{width:21px;height:21px}
+.err{margin:6px 0 0 4px;min-height:0;font-size:13px;color:var(--err)}
+.err:empty{display:none}
+.check{display:flex;align-items:center;gap:12px;font-size:15px;color:var(--muted);cursor:pointer}
+.check input{appearance:none;-webkit-appearance:none;flex:none;width:24px;height:24px;margin:0;border-radius:50%;border:1.5px solid #c5cdd9;background:#fff center/14px no-repeat;cursor:pointer;transition:background-color .15s,border-color .15s}
+.check input:checked{background-color:var(--navy);border-color:var(--navy);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23fff' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7'/%3E%3C/svg%3E")}
+.check input:focus-visible{outline:3px solid rgba(6,37,94,.3);outline-offset:2px}
+.check a{color:var(--navy);font-weight:500}
+.btn{width:100%;height:56px;display:flex;align-items:center;justify-content:center;gap:10px;border:0;border-radius:999px;background:var(--navy);color:#fff;font:inherit;font-size:16px;font-weight:600;cursor:pointer;transition:background .2s,transform .1s}
+.btn:hover{background:var(--navy-d)}
+.btn:active{transform:scale(.99)}
+.btn .ar{width:20px;height:20px;color:var(--lime)}
+.btn:disabled,.gbtn:disabled{cursor:not-allowed}
+.btn:disabled{opacity:.75}
+.gbtn:disabled{opacity:.7}
+.spin{display:none;width:20px;height:20px;border-radius:50%;border:3px solid rgba(255,255,255,.3);border-top-color:#fff;animation:sp .7s linear infinite}
+.gbtn .spin{border-color:rgba(6,37,94,.2);border-top-color:var(--navy)}
+.busy .spin{display:inline-block}
+.busy .ar,.busy .g{display:none}
+@keyframes sp{to{transform:rotate(360deg)}}
+.alt{margin:22px 0 0;text-align:center;font-size:15px;color:var(--muted)}
+.alt a{font-weight:600;color:var(--navy);text-decoration:none}
+.alt a:hover{text-decoration:underline}
+.note{margin:0 0 18px;padding:13px 16px;border-radius:18px;font-size:14px;line-height:1.5}
+.note[hidden]{display:none}
+.note.error{background:#fef2f2;border:1px solid #fecaca;color:#b91c1c}
+.note.ok{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534}
+.mail{width:64px;height:64px;margin:26px auto 0;display:flex;align-items:center;justify-content:center;border-radius:50%;background:var(--navy);color:var(--lime)}
+.mail svg{width:28px;height:28px}
+.mail + h1{margin-top:18px}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-user" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></symbol>
+    <symbol id="i-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="4"/><path d="m3.5 8.5 8.5 5.5 8.5-5.5"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="11" rx="4"/><path d="M8 10V8a4 4 0 0 1 8 0v2"/><path d="M9 15.5h.01M12 15.5h.01M15 15.5h.01" stroke-width="2.2"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2.5 12C4 8 7.5 5.5 12 5.5s8 2.5 9.5 6.5c-1.5 4-5 6.5-9.5 6.5S4 16 2.5 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-eyeoff" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3l18 18"/><path d="M10.6 5.6c.46-.07.93-.1 1.4-.1 4.5 0 8 2.5 9.5 6.5a12.4 12.4 0 0 1-2.9 4.3M6.4 7A12.2 12.2 0 0 0 2.5 12c1.5 4 5 6.5 9.5 6.5 1.6 0 3.1-.3 4.4-.9"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></symbol>
+    <symbol id="i-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></symbol>
+    <symbol id="i-google" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 0 1 0-9.4l-7.9-6.1a24 24 0 0 0 0 21.6l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.8 2.3-8.4 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></symbol>
+  </defs>
+</svg>
+
+<div class="page">
+  <div class="brand"><img class="logo" alt="Moneo" width="190" src="logo.png"></div>
+
+  <main class="card">
+    <div class="tabs" id="tabs" role="tablist" aria-label="Account">
+      <button type="button" role="tab" id="tab-login" data-go="login" aria-selected="true">Sign In</button>
+      <button type="button" role="tab" id="tab-register" data-go="register" aria-selected="false">Create Account</button>
+    </div>
+
+    <!-- LOGIN -->
+    <section class="view" id="view-login">
+      <h1>Welcome back</h1>
+      <p class="sub">Sign in to continue to your Moneo account.</p>
+      <div class="note" id="a-login" role="alert" aria-live="polite" hidden></div>
+      <button type="button" class="gbtn" data-google><span class="spin"></span><svg class="g"><use href="#i-google"/></svg><span class="lbl">Continue with Google</span></button>
+      <div class="divider">or email</div>
+      <form id="form-login" novalidate>
+        <div class="field">
+          <label for="l-email">Email</label>
+          <div class="inp"><svg class="ic"><use href="#i-mail"/></svg><input id="l-email" type="email" autocomplete="email" inputmode="email" placeholder="name@example.com" aria-describedby="l-email-e"></div>
+          <p class="err" id="l-email-e"></p>
+        </div>
+        <div class="field">
+          <label for="l-pass">Password <a href="#forgot" data-go="forgot">Forgot?</a></label>
+          <div class="inp"><svg class="ic"><use href="#i-lock"/></svg><input id="l-pass" type="password" autocomplete="current-password" placeholder="Enter your password" aria-describedby="l-pass-e"><button type="button" class="eye" data-eye="l-pass" aria-label="Show password" aria-pressed="false"><svg><use href="#i-eye"/></svg></button></div>
+          <p class="err" id="l-pass-e"></p>
+        </div>
+        <label class="check"><input type="checkbox" id="l-remember" checked> Remember me on this device</label>
+        <button class="btn" type="submit" data-busy="Signing in..."><span class="spin"></span><span class="lbl">Sign In</span><svg class="ar"><use href="#i-arrow"/></svg></button>
+      </form>
+      <p class="alt">Don't have an account? <a href="#register" data-go="register">Sign Up for free</a></p>
+    </section>
+
+    <!-- REGISTER -->
+    <section class="view" id="view-register" hidden>
+      <h1>Get started for free</h1>
+      <p class="sub">Create your Moneo account in less than a minute.</p>
+      <div class="note" id="a-register" role="alert" aria-live="polite" hidden></div>
+      <button type="button" class="gbtn" data-google><span class="spin"></span><svg class="g"><use href="#i-google"/></svg><span class="lbl">Continue with Google</span></button>
+      <div class="divider">or sign up with email</div>
+      <form id="form-register" novalidate>
+        <div class="field">
+          <label for="r-name">Full Name</label>
+          <div class="inp"><svg class="ic"><use href="#i-user"/></svg><input id="r-name" type="text" autocomplete="name" placeholder="John Doe" aria-describedby="r-name-e"></div>
+          <p class="err" id="r-name-e"></p>
+        </div>
+        <div class="field">
+          <label for="r-email">Email Address</label>
+          <div class="inp"><svg class="ic"><use href="#i-mail"/></svg><input id="r-email" type="email" autocomplete="email" inputmode="email" placeholder="name@example.com" aria-describedby="r-email-e"></div>
+          <p class="err" id="r-email-e"></p>
+        </div>
+        <div class="field">
+          <label for="r-pass">Password</label>
+          <div class="inp"><svg class="ic"><use href="#i-lock"/></svg><input id="r-pass" type="password" autocomplete="new-password" placeholder="At least 8 characters" aria-describedby="r-pass-e"><button type="button" class="eye" data-eye="r-pass" aria-label="Show password" aria-pressed="false"><svg><use href="#i-eye"/></svg></button></div>
+          <p class="err" id="r-pass-e"></p>
+        </div>
+        <div class="field">
+          <label for="r-confirm">Confirm Password</label>
+          <div class="inp"><svg class="ic"><use href="#i-lock"/></svg><input id="r-confirm" type="password" autocomplete="new-password" placeholder="Type your password again" aria-describedby="r-confirm-e"><button type="button" class="eye" data-eye="r-confirm" aria-label="Show password" aria-pressed="false"><svg><use href="#i-eye"/></svg></button></div>
+          <p class="err" id="r-confirm-e"></p>
+        </div>
+        <div class="field">
+          <label class="check"><input type="checkbox" id="r-terms" aria-describedby="r-terms-e"><span>I agree to the <a href="terms.html" target="_blank" rel="noopener">Terms</a> and <a href="privacy.html" target="_blank" rel="noopener">Privacy Policy</a></span></label>
+          <p class="err" id="r-terms-e"></p>
+        </div>
+        <button class="btn" type="submit" data-busy="Creating account..."><span class="spin"></span><span class="lbl">Create Free Account</span><svg class="ar"><use href="#i-arrow"/></svg></button>
+      </form>
+      <p class="alt">Already have an account? <a href="#login" data-go="login">Sign In</a></p>
+    </section>
+
+    <!-- FORGOT -->
+    <section class="view" id="view-forgot" hidden>
+      <button type="button" class="back" data-go="login"><svg width="18" height="18"><use href="#i-back"/></svg>Back to sign in</button>
+      <h1>Forgot your password?</h1>
+      <p class="sub">Enter your email and we'll send you a link to reset it.</p>
+      <div class="note" id="a-forgot" role="alert" aria-live="polite" hidden></div>
+      <form id="form-forgot" novalidate>
+        <div class="field">
+          <label for="f-email">Email</label>
+          <div class="inp"><svg class="ic"><use href="#i-mail"/></svg><input id="f-email" type="email" autocomplete="email" inputmode="email" placeholder="name@example.com" aria-describedby="f-email-e"></div>
+          <p class="err" id="f-email-e"></p>
+        </div>
+        <button class="btn" type="submit" data-busy="Sending link..."><span class="spin"></span><span class="lbl">Send Reset Link</span><svg class="ar"><use href="#i-arrow"/></svg></button>
+      </form>
+    </section>
+
+    <!-- RESET -->
+    <section class="view" id="view-reset" hidden>
+      <h1>Set a new password</h1>
+      <p class="sub">Choose a strong password you haven't used before.</p>
+      <div class="note" id="a-reset" role="alert" aria-live="polite" hidden></div>
+      <form id="form-reset" novalidate>
+        <div class="field">
+          <label for="n-pass">New Password</label>
+          <div class="inp"><svg class="ic"><use href="#i-lock"/></svg><input id="n-pass" type="password" autocomplete="new-password" placeholder="At least 8 characters" aria-describedby="n-pass-e"><button type="button" class="eye" data-eye="n-pass" aria-label="Show password" aria-pressed="false"><svg><use href="#i-eye"/></svg></button></div>
+          <p class="err" id="n-pass-e"></p>
+        </div>
+        <div class="field">
+          <label for="n-confirm">Confirm New Password</label>
+          <div class="inp"><svg class="ic"><use href="#i-lock"/></svg><input id="n-confirm" type="password" autocomplete="new-password" placeholder="Type it again" aria-describedby="n-confirm-e"><button type="button" class="eye" data-eye="n-confirm" aria-label="Show password" aria-pressed="false"><svg><use href="#i-eye"/></svg></button></div>
+          <p class="err" id="n-confirm-e"></p>
+        </div>
+        <button class="btn" type="submit" data-busy="Saving..."><span class="spin"></span><span class="lbl">Update Password</span><svg class="ar"><use href="#i-arrow"/></svg></button>
+      </form>
+    </section>
+
+    <!-- CHECK EMAIL -->
+    <section class="view" id="view-sent" hidden>
+      <div class="mail"><svg><use href="#i-mail"/></svg></div>
+      <h1>Check your email</h1>
+      <p class="sub" id="sent-text"></p>
+      <p class="alt"><a href="#login" data-go="login">Back to sign in</a></p>
+    </section>
+  </main>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script>
+(function () {
+  /* ============ EDIT THESE ============ */
+  var CONFIG = {
+    SUPABASE_URL: "https://pgfsowumyjzuwegrctfn.supabase.co",
+    SUPABASE_ANON_KEY: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBnZnNvd3VteWp6dXdlZ3JjdGZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM0NDUwOTcsImV4cCI6MjEwOTAyMTA5N30.Vn7ILVTysY6QChWtBQ35kTdbF6r3FoezaDYKNjHQxcU",
+    AFTER_LOGIN: "index.html" // page users go to after signing in
+  };
+  /* ==================================== */
+
+  var REDIRECT = location.origin + location.pathname; // this page
+  var $ = function (s) { return document.querySelector(s); };
+  var $$ = function (s) { return Array.prototype.slice.call(document.querySelectorAll(s)); };
+  var configured = CONFIG.SUPABASE_URL.indexOf("PASTE_") === -1 && CONFIG.SUPABASE_ANON_KEY.indexOf("PASTE_") === -1;
+
+  /* Remember me: keep the session in localStorage (stays) or sessionStorage (ends when the browser closes) */
+  function remember() { return localStorage.getItem("moneo_remember") !== "0"; }
+  var storage = {
+    getItem: function (k) { var v = localStorage.getItem(k); return v !== null ? v : sessionStorage.getItem(k); },
+    setItem: function (k, v) {
+      var keep = remember() ? localStorage : sessionStorage, other = remember() ? sessionStorage : localStorage;
+      keep.setItem(k, v); other.removeItem(k);
+    },
+    removeItem: function (k) { localStorage.removeItem(k); sessionStorage.removeItem(k); }
+  };
+
+  var sb = configured ? window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY, {
+    auth: { flowType: "pkce", persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storage: storage }
+  }) : null;
+
+  var TITLES = { login: "Sign In", register: "Create Account", forgot: "Forgot Password", reset: "Reset Password", sent: "Check Your Email" };
+  var current = "login", recovering = false, loggingOut = location.hash === "#logout";
+
+  /* ---------- helpers ---------- */
+  function show(v, push) {
+    current = v;
+    $$(".view").forEach(function (el) { el.hidden = el.id !== "view-" + v; });
+    $("#tabs").hidden = !(v === "login" || v === "register");
+    $("#tab-login").setAttribute("aria-selected", v === "login");
+    $("#tab-register").setAttribute("aria-selected", v === "register");
+    document.title = TITLES[v] + " | Moneo";
+    if (push !== false && (v === "login" || v === "register" || v === "forgot")) history.replaceState(null, "", location.pathname + location.search + "#" + v);
+    window.scrollTo(0, 0);
+  }
+  function note(v, type, msg) {
+    var el = $("#a-" + v);
+    if (!msg) { el.hidden = true; el.textContent = ""; return; }
+    el.className = "note " + type; el.textContent = msg; el.hidden = false;
+  }
+  function fieldErr(id, msg) {
+    var e = $("#" + id + "-e"), i = $("#" + id);
+    e.textContent = msg || "";
+    if (msg) i.setAttribute("aria-invalid", "true"); else i.removeAttribute("aria-invalid");
+  }
+  function clearErrs(v) {
+    $$("#view-" + v + " input").forEach(function (i) { i.removeAttribute("aria-invalid"); });
+    $$("#view-" + v + " .err").forEach(function (e) { e.textContent = ""; });
+    note(v, "", "");
+  }
+  function busy(v, btn, on) {
+    $$("#view-" + v + " input, #view-" + v + " button, #tabs button").forEach(function (el) { el.disabled = on; });
+    btn.classList.toggle("busy", on);
+    var l = btn.querySelector(".lbl");
+    if (l) {
+      if (on) { l.dataset.o = l.textContent; if (btn.dataset.busy) l.textContent = btn.dataset.busy; }
+      else if (l.dataset.o) l.textContent = l.dataset.o;
+    }
+  }
+  function isEmail(s) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s.trim()); }
+  function pwProblem(p) {
+    if (p.length < 8) return "Use at least 8 characters.";
+    if (!/[A-Za-z]/.test(p)) return "Include at least one letter.";
+    if (!/[0-9]/.test(p)) return "Include at least one number.";
+    return "";
+  }
+  function friendly(m) {
+    var t = (m || "").toLowerCase();
+    if (t.indexOf("invalid login") > -1) return "Email or password is incorrect.";
+    if (t.indexOf("email not confirmed") > -1) return "Please confirm your email first. Check your inbox for the link.";
+    if (t.indexOf("already registered") > -1) return "An account with this email already exists. Try signing in.";
+    if (t.indexOf("rate limit") > -1 || t.indexOf("too many") > -1 || t.indexOf("security purposes") > -1) return "Too many attempts. Please wait a few minutes and try again.";
+    if (t.indexOf("same password") > -1 || t.indexOf("different from the old") > -1) return "Your new password must be different from your old one.";
+    if (t.indexOf("provider is not enabled") > -1) return "Google sign-in is not turned on yet in Supabase.";
+    if (t.indexOf("failed to fetch") > -1 || t.indexOf("network") > -1) return "Network problem. Check your internet and try again.";
+    return m || "Something went wrong. Please try again.";
+  }
+  function ready(v) {
+    if (configured) return true;
+    note(v, "error", "Supabase is not set up yet. Open this file and paste your Supabase URL and key at the top of the script.");
+    return false;
+  }
+  function go() { location.replace(CONFIG.AFTER_LOGIN); }
+  function cleanUrl() { history.replaceState(null, "", location.pathname + "#" + (current === "register" || current === "forgot" ? current : "login")); }
+
+  /* ---------- navigation ---------- */
+  document.addEventListener("click", function (e) {
+    var t = e.target.closest("[data-go]");
+    if (t) { e.preventDefault(); clearErrs(current); show(t.dataset.go); }
+    var eye = e.target.closest("[data-eye]");
+    if (eye) {
+      var inp = $("#" + eye.dataset.eye), showing = inp.type === "text";
+      inp.type = showing ? "password" : "text";
+      eye.setAttribute("aria-label", showing ? "Show password" : "Hide password");
+      eye.setAttribute("aria-pressed", String(!showing));
+      eye.querySelector("use").setAttribute("href", showing ? "#i-eye" : "#i-eyeoff");
+    }
+  });
+  window.addEventListener("hashchange", function () {
+    var h = location.hash.slice(1);
+    if (h === "login" || h === "register" || h === "forgot") { if (h !== current) { clearErrs(current); show(h, false); } }
+  });
+  window.addEventListener("pageshow", function (e) {
+    if (e.persisted) { $$("input,button").forEach(function (el) { el.disabled = false; }); $$(".busy").forEach(function (el) { el.classList.remove("busy"); }); }
+  });
+
+  /* ---------- login ---------- */
+  $("#form-login").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    clearErrs("login");
+    if (!ready("login")) return;
+    var email = $("#l-email").value.trim(), pass = $("#l-pass").value, bad = false;
+    if (!isEmail(email)) { fieldErr("l-email", "Enter a valid email address."); bad = true; }
+    if (!pass) { fieldErr("l-pass", "Enter your password."); bad = true; }
+    if (bad) return;
+    localStorage.setItem("moneo_remember", $("#l-remember").checked ? "1" : "0");
+    var btn = e.target.querySelector(".btn");
+    busy("login", btn, true);
+    var r = await sb.auth.signInWithPassword({ email: email, password: pass });
+    if (r.error) { busy("login", btn, false); note("login", "error", friendly(r.error.message)); return; }
+    go();
+  });
+
+  /* ---------- register ---------- */
+  $("#form-register").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    clearErrs("register");
+    if (!ready("register")) return;
+    var name = $("#r-name").value.trim(), email = $("#r-email").value.trim(), pass = $("#r-pass").value, conf = $("#r-confirm").value, bad = false;
+    if (name.length < 2) { fieldErr("r-name", "Enter your full name."); bad = true; }
+    if (!isEmail(email)) { fieldErr("r-email", "Enter a valid email address."); bad = true; }
+    var p = pwProblem(pass);
+    if (p) { fieldErr("r-pass", p); bad = true; }
+    if (conf !== pass) { fieldErr("r-confirm", "Passwords do not match."); bad = true; }
+    if (!$("#r-terms").checked) { fieldErr("r-terms", "You must accept the terms to continue."); bad = true; }
+    if (bad) return;
+    localStorage.setItem("moneo_remember", "1");
+    var btn = e.target.querySelector(".btn");
+    busy("register", btn, true);
+    var r = await sb.auth.signUp({ email: email, password: pass, options: { data: { full_name: name }, emailRedirectTo: REDIRECT } });
+    busy("register", btn, false);
+    if (r.error) { note("register", "error", friendly(r.error.message)); return; }
+    if (r.data.user && r.data.user.identities && r.data.user.identities.length === 0) {
+      note("register", "error", "An account with this email already exists. Try signing in."); return;
+    }
+    if (!r.data.session) {
+      $("#sent-text").textContent = "We sent a confirmation link to " + email + ". Open it to activate your account.";
+      show("sent", false); return;
+    }
+    go();
+  });
+
+  /* ---------- forgot password ---------- */
+  $("#form-forgot").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    clearErrs("forgot");
+    if (!ready("forgot")) return;
+    var email = $("#f-email").value.trim();
+    if (!isEmail(email)) { fieldErr("f-email", "Enter a valid email address."); return; }
+    localStorage.setItem("moneo_remember", "1");
+    var btn = e.target.querySelector(".btn");
+    busy("forgot", btn, true);
+    var r = await sb.auth.resetPasswordForEmail(email, { redirectTo: REDIRECT });
+    busy("forgot", btn, false);
+    if (r.error) { note("forgot", "error", friendly(r.error.message)); return; }
+    $("#sent-text").textContent = "If an account exists for " + email + ", a password reset link is on its way. Check your spam folder too.";
+    show("sent", false);
+  });
+
+  /* ---------- reset password ---------- */
+  $("#form-reset").addEventListener("submit", async function (e) {
+    e.preventDefault();
+    clearErrs("reset");
+    if (!ready("reset")) return;
+    var pass = $("#n-pass").value, conf = $("#n-confirm").value, bad = false;
+    var p = pwProblem(pass);
+    if (p) { fieldErr("n-pass", p); bad = true; }
+    if (conf !== pass) { fieldErr("n-confirm", "Passwords do not match."); bad = true; }
+    if (bad) return;
+    var btn = e.target.querySelector(".btn");
+    busy("reset", btn, true);
+    var r = await sb.auth.updateUser({ password: pass });
+    if (r.error) { busy("reset", btn, false); note("reset", "error", friendly(r.error.message)); return; }
+    await sb.auth.signOut();
+    busy("reset", btn, false);
+    recovering = false;
+    $("#n-pass").value = ""; $("#n-confirm").value = "";
+    show("login");
+    note("login", "ok", "Password updated. Sign in with your new password.");
+  });
+
+  /* ---------- Google ---------- */
+  $$("[data-google]").forEach(function (btn) {
+    btn.addEventListener("click", async function () {
+      var v = current;
+      note(v, "", "");
+      if (!ready(v)) return;
+      localStorage.setItem("moneo_remember", v === "login" && !$("#l-remember").checked ? "0" : "1");
+      busy(v, btn, true);
+      var r = await sb.auth.signInWithOAuth({ provider: "google", options: { redirectTo: REDIRECT, queryParams: { prompt: "select_account" } } });
+      if (r.error) { busy(v, btn, false); note(v, "error", friendly(r.error.message)); }
+    });
+  });
+
+  /* ---------- start up ---------- */
+  var start = location.hash.slice(1);
+  show(start === "register" || start === "forgot" ? start : "login", false);
+
+  // Errors coming back in the URL (cancelled Google, expired link, etc.)
+  var q = new URLSearchParams(location.search), h = new URLSearchParams(location.hash.slice(1));
+  var errCode = q.get("error_code") || h.get("error_code") || q.get("error") || h.get("error");
+  var errDesc = (q.get("error_description") || h.get("error_description") || "").replace(/\+/g, " ");
+  if (errCode) {
+    if (errCode === "otp_expired" || /expired|invalid/i.test(errDesc)) {
+      show("forgot", false);
+      note("forgot", "error", "This link has expired or was already used. Request a new one.");
+    } else if (errCode === "access_denied") {
+      show("login", false);
+      note("login", "error", "Google sign-in was cancelled. You can try again.");
+    } else {
+      show("login", false);
+      note("login", "error", errDesc || "Sign-in failed. Please try again.");
+    }
+    history.replaceState(null, "", location.pathname + "#" + current);
+  }
+
+  if (!configured) { note(current, "error", "Supabase is not set up yet. Open this file and paste your Supabase URL and key at the top of the script."); return; }
+
+  // Logout link: login.html#logout
+  if (loggingOut) {
+    sb.auth.signOut().then(function () {
+      loggingOut = false; show("login"); note("login", "ok", "You have been signed out.");
+    });
+  }
+
+  // Session handling: password recovery, Google return, already signed in
+  sb.auth.onAuthStateChange(function (event, session) {
+    if (event === "PASSWORD_RECOVERY") { recovering = true; show("reset", false); cleanUrl(); return; }
+    if (session && (event === "SIGNED_IN" || event === "INITIAL_SESSION")) {
+      setTimeout(function () { if (!recovering && !loggingOut) go(); }, 400);
+    }
+  });
+})();
+</script>
+</body>
+</html>
