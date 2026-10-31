@@ -117,8 +117,8 @@ form{display:grid;gap:18px}
       <div class="divider">or email</div>
       <form id="form-login" novalidate>
         <div class="field">
-          <label for="l-email">Email</label>
-          <div class="inp"><svg class="ic"><use href="#i-mail"/></svg><input id="l-email" type="email" autocomplete="email" inputmode="email" placeholder="name@example.com" aria-describedby="l-email-e"></div>
+          <label for="l-email">Email or Username</label>
+          <div class="inp"><svg class="ic"><use href="#i-user"/></svg><input id="l-email" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="name@example.com or username" aria-describedby="l-email-e"></div>
           <p class="err" id="l-email-e"></p>
         </div>
         <div class="field">
@@ -141,9 +141,19 @@ form{display:grid;gap:18px}
       <div class="divider">or sign up with email</div>
       <form id="form-register" novalidate>
         <div class="field">
-          <label for="r-name">Full Name</label>
-          <div class="inp"><svg class="ic"><use href="#i-user"/></svg><input id="r-name" type="text" autocomplete="name" placeholder="John Doe" aria-describedby="r-name-e"></div>
-          <p class="err" id="r-name-e"></p>
+          <label for="r-first">Name</label>
+          <div class="inp"><svg class="ic"><use href="#i-user"/></svg><input id="r-first" type="text" autocomplete="given-name" placeholder="John" aria-describedby="r-first-e"></div>
+          <p class="err" id="r-first-e"></p>
+        </div>
+        <div class="field">
+          <label for="r-last">Surname</label>
+          <div class="inp"><svg class="ic"><use href="#i-user"/></svg><input id="r-last" type="text" autocomplete="family-name" placeholder="Doe" aria-describedby="r-last-e"></div>
+          <p class="err" id="r-last-e"></p>
+        </div>
+        <div class="field">
+          <label for="r-user">Username</label>
+          <div class="inp"><svg class="ic"><use href="#i-user"/></svg><input id="r-user" type="text" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="johndoe" aria-describedby="r-user-e"></div>
+          <p class="err" id="r-user-e"></p>
         </div>
         <div class="field">
           <label for="r-email">Email Address</label>
@@ -246,6 +256,7 @@ form{display:grid;gap:18px}
     auth: { flowType: "pkce", persistSession: true, autoRefreshToken: true, detectSessionInUrl: true, storage: storage }
   }) : null;
 
+  var USERNAME_RE = /^[a-z0-9_]{3,20}$/;
   var TITLES = { login: "Sign In", register: "Create Account", forgot: "Forgot Password", reset: "Reset Password", sent: "Check Your Email" };
   var current = "login", recovering = false, loggingOut = location.hash === "#logout";
 
@@ -298,6 +309,7 @@ form{display:grid;gap:18px}
     if (t.indexOf("already registered") > -1) return "An account with this email already exists. Try signing in.";
     if (t.indexOf("rate limit") > -1 || t.indexOf("too many") > -1 || t.indexOf("security purposes") > -1) return "Too many attempts. Please wait a few minutes and try again.";
     if (t.indexOf("same password") > -1 || t.indexOf("different from the old") > -1) return "Your new password must be different from your old one.";
+    if (t.indexOf("database error saving new user") > -1) return "That username may already be taken. Try a different one.";
     if (t.indexOf("provider is not enabled") > -1) return "Google sign-in is not turned on yet in Supabase.";
     if (t.indexOf("failed to fetch") > -1 || t.indexOf("network") > -1) return "Network problem. Check your internet and try again.";
     return m || "Something went wrong. Please try again.";
@@ -336,13 +348,21 @@ form{display:grid;gap:18px}
     e.preventDefault();
     clearErrs("login");
     if (!ready("login")) return;
-    var email = $("#l-email").value.trim(), pass = $("#l-pass").value, bad = false;
-    if (!isEmail(email)) { fieldErr("l-email", "Enter a valid email address."); bad = true; }
+    var id = $("#l-email").value.trim(), pass = $("#l-pass").value, bad = false;
+    if (!id) { fieldErr("l-email", "Enter your email or username."); bad = true; }
+    else if (id.indexOf("@") > -1 && !isEmail(id)) { fieldErr("l-email", "Enter a valid email address."); bad = true; }
     if (!pass) { fieldErr("l-pass", "Enter your password."); bad = true; }
     if (bad) return;
     localStorage.setItem("moneo_remember", $("#l-remember").checked ? "1" : "0");
     var btn = e.target.querySelector(".btn");
     busy("login", btn, true);
+    var email = id;
+    if (id.indexOf("@") === -1) {
+      var lk = await sb.rpc("email_for_login", { identifier: id });
+      if (lk.error) { busy("login", btn, false); note("login", "error", "Username sign-in is not set up yet. Please use your email."); return; }
+      if (!lk.data) { busy("login", btn, false); note("login", "error", "Username or password is incorrect."); return; }
+      email = lk.data;
+    }
     var r = await sb.auth.signInWithPassword({ email: email, password: pass });
     if (r.error) { busy("login", btn, false); note("login", "error", friendly(r.error.message)); return; }
     go();
@@ -353,8 +373,11 @@ form{display:grid;gap:18px}
     e.preventDefault();
     clearErrs("register");
     if (!ready("register")) return;
-    var name = $("#r-name").value.trim(), email = $("#r-email").value.trim(), pass = $("#r-pass").value, conf = $("#r-confirm").value, bad = false;
-    if (name.length < 2) { fieldErr("r-name", "Enter your full name."); bad = true; }
+    var first = $("#r-first").value.trim(), last = $("#r-last").value.trim(), uname = $("#r-user").value.trim().toLowerCase();
+    var email = $("#r-email").value.trim(), pass = $("#r-pass").value, conf = $("#r-confirm").value, bad = false;
+    if (first.length < 2) { fieldErr("r-first", "Enter your name."); bad = true; }
+    if (last.length < 2) { fieldErr("r-last", "Enter your surname."); bad = true; }
+    if (!USERNAME_RE.test(uname)) { fieldErr("r-user", "Use 3 to 20 letters, numbers or underscores."); bad = true; }
     if (!isEmail(email)) { fieldErr("r-email", "Enter a valid email address."); bad = true; }
     var p = pwProblem(pass);
     if (p) { fieldErr("r-pass", p); bad = true; }
@@ -364,7 +387,12 @@ form{display:grid;gap:18px}
     localStorage.setItem("moneo_remember", "1");
     var btn = e.target.querySelector(".btn");
     busy("register", btn, true);
-    var r = await sb.auth.signUp({ email: email, password: pass, options: { data: { full_name: name }, emailRedirectTo: REDIRECT } });
+    var free = await sb.rpc("username_available", { u: uname });
+    if (!free.error && free.data === false) {
+      busy("register", btn, false);
+      fieldErr("r-user", "This username is taken. Try another."); return;
+    }
+    var r = await sb.auth.signUp({ email: email, password: pass, options: { data: { first_name: first, last_name: last, username: uname, full_name: first + " " + last }, emailRedirectTo: REDIRECT } });
     busy("register", btn, false);
     if (r.error) { note("register", "error", friendly(r.error.message)); return; }
     if (r.data.user && r.data.user.identities && r.data.user.identities.length === 0) {
@@ -375,6 +403,16 @@ form{display:grid;gap:18px}
       show("sent", false); return;
     }
     go();
+  });
+
+  /* ---------- username check while typing ---------- */
+  $("#r-user").addEventListener("blur", async function () {
+    var u = this.value.trim().toLowerCase();
+    if (!u || !sb) return;
+    if (!USERNAME_RE.test(u)) { fieldErr("r-user", "Use 3 to 20 letters, numbers or underscores."); return; }
+    var free = await sb.rpc("username_available", { u: u });
+    if (!free.error && free.data === false) fieldErr("r-user", "This username is taken. Try another.");
+    else fieldErr("r-user", "");
   });
 
   /* ---------- forgot password ---------- */
